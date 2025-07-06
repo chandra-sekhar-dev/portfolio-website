@@ -30,10 +30,7 @@
         "name": "Bootstrap",
         "icon": "https://img.icons8.com/color/48/000000/bootstrap.png"
     },
-    {
-        "name": "Sass",
-        "icon": "https://img.icons8.com/color/48/000000/sass.png"
-    },
+   
     {
         "name": "HTML5",
         "icon": "https://img.icons8.com/color/48/000000/html-5--v1.png"
@@ -84,9 +81,6 @@
     {
         "name":"Php",
         "icon":"https://img.icons8.com/color/48/000000/php.png"
-    },
-    {
-        "name":"Laravel",
-        "icon":"https://img.icons8.com/color/48/000000/laravel.png"
     }
+   
 ]
