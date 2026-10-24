@@ -34,21 +34,28 @@ export default async function handler(request) {
     return json(405, { error: "Method not allowed." });
   }
 
-  const key = process.env.OPENAI_API_KEY;
+  const key = process.env.OPENAI_API_KEY?.trim();
+
   if (!key) {
-    return json(500, { error: "AI assistant is not configured." });
+    console.error("OPENAI_API_KEY is missing.");
+    return json(500, {
+      error: "AI assistant is not configured."
+    });
   }
 
   let body;
+
   try {
     body = await request.json();
   } catch {
     return json(400, { error: "Invalid request." });
   }
 
-  if (!Array.isArray(body.messages) ||
-      body.messages.length < 1 ||
-      body.messages.length > 12) {
+  if (
+    !Array.isArray(body.messages) ||
+    body.messages.length < 1 ||
+    body.messages.length > 12
+  ) {
     return json(400, { error: "Invalid conversation." });
   }
 
@@ -64,9 +71,13 @@ export default async function handler(request) {
     }))
     .filter(m => m.content);
 
-  if (!messages.length ||
-      messages[messages.length - 1].role !== "user") {
-    return json(400, { error: "A user message is required." });
+  if (
+    !messages.length ||
+    messages[messages.length - 1].role !== "user"
+  ) {
+    return json(400, {
+      error: "A user message is required."
+    });
   }
 
   try {
@@ -90,9 +101,16 @@ export default async function handler(request) {
     const result = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-      console.error("OpenAI API status:", response.status);
+      // Log diagnostic information, never the API key.
+      console.error("OpenAI API error:", {
+        status: response.status,
+        type: result.error?.type,
+        code: result.error?.code,
+        message: result.error?.message
+      });
+
       return json(502, {
-        error: "AI request failed. Check API access, model availability, and billing."
+        error: "AI request failed. Check server logs."
       });
     }
 
@@ -104,12 +122,20 @@ export default async function handler(request) {
       .trim();
 
     if (!reply) {
-      return json(502, { error: "No response received from AI." });
+      console.error("OpenAI returned no output text.");
+
+      return json(502, {
+        error: "No response received from AI."
+      });
     }
 
     return json(200, { reply });
+
   } catch (error) {
     console.error("AI function error:", error.message);
-    return json(500, { error: "Temporary AI service error." });
+
+    return json(500, {
+      error: "Temporary AI service error."
+    });
   }
 }
